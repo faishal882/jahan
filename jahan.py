@@ -1,12 +1,13 @@
 import urllib
-import os
 from wsgiref.headers import Headers
 import http as _http
 import re
 from wsgiref.simple_server import make_server
-import importlib
+import string
 
 ############################ REQUEST OBJECT ###############################
+
+
 class Request:
     """ 
     A wrapper for WSGI environment dictionaries. All methods are readble only
@@ -29,9 +30,11 @@ class Request:
         return self.environ.get('REQUEST_METHOD')
 
     def __repr__(self):
-        return '<%s: %s %s>' % (self.__class__.__name__, self.method)
+        return '<%s: %s %s>' % (self.__class__.__name__, self.method, self.path)
 
 ########################### RESPONSE OBJECT ###############################
+
+
 class Response:
     """ 
     Class for a response body and headers.
@@ -64,14 +67,43 @@ class Response:
     def __repr__(self):
         return f'<{self.__class__.__name__}: status: {self.status}>'
 
+
+class TemplateResponse(Response):
+    def __init__(self, template, context=None, **kwargs):
+        super().__init__(**kwargs)
+        self.template = template
+        self.context = context
+
+    def __iter__(self):
+        template = string.Template(open(self.template).read())
+        response = template.substitute(self.context)
+        yield response.encode(self.charset)
+
+
+class Router:
+    def __init__(self):
+        self.routing_table = []
+
+    def add_route(self, patten, callback):
+        self.routing_table.append((patten, callback))
+
+    def match(self, path):
+        for (pattern, callback) in self.routing_table:
+            m = re.match(pattern, path)
+            print("ROUTER>>>", pattern, path, callback, m.groups())
+            if m:
+                return (callback, m.groups())
+        raise ModuleNotFoundError()
 ########################### ROUTER OBJECT ################################
+
+
 class Router:
     """
     Class for storing url routes
     """
 
     def __init__(self):
-        self.routing_table = [] 
+        self.routing_table = []
 
     def add_route(self, patten, callback):
         self.routing_table.append((patten, callback))
@@ -96,19 +128,20 @@ class Jahan:
 
     def __init__(self):
         self.router = Router()
-        
-
 
     def run(self, **kwargs):
-        ''' Calls :func:`run` with the same parameters. ''' 
+        ''' Calls :func:`run` with the same parameters. '''
         run(self, **kwargs)
 
-    def add_route(self, route, callback):
+    def add_route(self, route):
         ''' Add a route object, but do not change the :data:`Route.app`
             attribute.'''
-        self.router.add_route(route, callback)
+        def decorator(func):
+            self.router.add_route(route, func)
+            return func
+        return decorator
         # return callback
-    
+
     def application(self, enviorn, start_response):
         try:
             request = Request(enviorn)
@@ -116,11 +149,11 @@ class Jahan:
             response = callback(request, *args)
         except:
             response = Response("<h1>Not Found</h1>", status=404)
-        
+
         start_response(response.status, response.headers.items())
         return iter(response)
 
-    
+
 def run(application, **kwargs):
     with make_server("", 8000, application.application) as httpd:
         print("Serving on http://127.0.0.1:8000/ ")
