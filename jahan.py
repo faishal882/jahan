@@ -5,6 +5,8 @@ import re
 from wsgiref.simple_server import make_server
 import string
 
+from jinja2 import Template
+
 ############################ REQUEST OBJECT ###############################
 class Request:
     """ 
@@ -117,10 +119,9 @@ class TemplateResponse(Response):
         self.context = context
 
     def __iter__(self):
-        template = string.Template(open(self.template).read())
-        response = template.substitute(self.context)
+        template = Template(open(self.template).read())
+        response = template.render(self.context)
         yield response.encode(self.charset)
-
 
 ########################### ROUTER OBJECT ################################
 class Router:
