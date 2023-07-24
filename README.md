@@ -1,5 +1,8 @@
 ## jahan
-A very simple WSGI webframework with python
+A very simple WSGI webframework with python inspired from Flask
+
+## Demo app
+Please visit here<https://github.com/faishal882/jahan-demo-app> to test demo app built using Jahan and SQLAlchemy
 
 ## Clone Respository
 clone jahan webframework repository in your local machine
