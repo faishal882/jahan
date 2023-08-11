@@ -1,11 +1,12 @@
-import urllib
-from wsgiref.headers import Headers
-import http as _http
 import re
+import urllib
+import http as _http
+from wsgiref.headers import Headers
 from wsgiref.simple_server import make_server
-import string
 
 from jinja2 import Template
+
+__version__ = "1.0"
 
 ############################ REQUEST OBJECT ###############################
 class Request:
@@ -19,9 +20,9 @@ class Request:
     @property
     def get_qs(self):
         """
-        method allows you to get data provided by user via GET method or else returns {}
+        method allows you to get data provided by user via query string or else returns {}
 
-           Use: request = Resquest()
+           Use: request = Request()
               : requset.get_qs 
         """
         get_args = urllib.parse.parse_qs(self.environ['QUERY_STRING'])
@@ -42,7 +43,6 @@ class Request:
             length = 0
         if length != 0:
             data = self.environ['wsgi.input'].read(length).decode('utf8')
-
         get_data = urllib.parse.parse_qs(data)
         return {k: v[0] for k, v in get_data.items()}
 
@@ -69,6 +69,7 @@ class Request:
 
     def __repr__(self):
         return '<%s: %s %s queryset=%s>' % (self.__class__.__name__, self.method, self.path, self.get_qs)
+
 
 ########################### RESPONSE OBJECT ###############################
 class Response:
@@ -113,7 +114,8 @@ class TemplateResponse(Response):
                        including the reason phrase (e.g. '200 OK').
     :param context: A dictionary of list-value pair to be inserted in template.
     """
-    def __init__(self, template, context=None, **kwargs):
+
+    def __init__(self, template, context={}, **kwargs):
         super().__init__(**kwargs)
         self.template = template
         self.context = context
@@ -122,6 +124,7 @@ class TemplateResponse(Response):
         template = Template(open(self.template).read())
         response = template.render(self.context)
         yield response.encode(self.charset)
+
 
 ########################### ROUTER OBJECT ################################
 class Router:
@@ -164,11 +167,15 @@ class Jahan:
     Instances are callable WSGI applications.
     """
 
-    def __init__(self):
+    def __init__(self, name):
+        self.name = name
         self.router = Router()
 
     def run(self, **kwargs):
-        """" Calls :func:`run` with the wsgi instance application. """
+        """" 
+        Calls :func:`run` with the wsgi instance application.
+        Runs WSGI application with built in python wsgiref server
+        """
         run(self, **kwargs)
 
     def add_route(self, route):
