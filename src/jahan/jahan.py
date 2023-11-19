@@ -193,12 +193,12 @@ class Jahan:
         """
         WSGI instance application, excepts enviorn and start_response to be passed by wsgi server
         """
+        request = Request(enviorn)
         try:
-            request = Request(enviorn)
-            callback, args = self.router.match(request.path)
-            response = callback(request, *args)
-        except:
-            response = Response("<h1>Not Found</h1>", status=404)
+          callback, args = self.router.match(request.path)
+          response = callback(request, *args)
+        except ModuleNotFoundError as m:
+             response = Response("<h1>Not found</h1>", status=404)
 
         start_response(response.status, response.headers.items())
         return iter(response)
