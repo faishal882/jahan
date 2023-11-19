@@ -8,7 +8,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 
-from server import parse_header
+from src.server.server import parse_header
 
 
 class TestParsingFunctions(unittest.TestCase):
