@@ -206,8 +206,7 @@ from jahan.jahan import Response, Jahan
 app = Jahan()
 
 @app.add_route(r'/$')
-def index(request, name):
-    print(request, name)
+def index(request):
     return Response(f'Hello world')
 
 if __name__ == "__main__":
@@ -239,4 +238,7 @@ It will start the waitress server you can check by visiting http://127.0.0.1:800
 
 ## WARNING 😞
 
-Please avoid using it in deployment as none of the security protocol has been implemented, nor does error handling has been done properly.
+Please avoid using it in deployment as none of the security protocol has been implemented,
+nor does error handling has been done properly.
+The purpose of this WebFramework is to understand the core of how webframeworks works. 
+It can be also used to build your own webframework based on your needs
