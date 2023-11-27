@@ -193,7 +193,17 @@ clone jahan webframework repository in your local machine
 ```bash
 git clone https://github.com/faishal882/jahan.git
 ```
+## Install Respository
 
+Install Respository in your preferred virtual environment
+
+
+```bash
+python -m pip isntall -e .
+```
+```bash
+
+```
 ## Setup
 
 Ensure you have python 3.6+ installed.😊
